@@ -530,14 +530,15 @@
                    (set (keys key-specs))
                    (->> selection (filter keyword?) set))
         sub-selects (->> selection (filter map?) (apply merge))
-        lookup #(if (qualified-keyword? %)
-                  (let [schema-obj (s/get-spec %)]
-                    (if (s/schema? schema-obj)
-                      (let [sub-schema (vec (some-> schema-obj keyspecs keys))
-                            sub-selection (get sub-selects % [])]
-                        (s/resolve-spec `(s/select ~sub-schema ~sub-selection)))
-                      schema-obj))
-                  (get key-specs %))
+        lookup #(#'s/reg-resolve
+                  (if (qualified-keyword? %)
+                    (let [schema-obj (s/get-spec %)]
+                      (if (s/schema? schema-obj)
+                        (let [sub-schema (vec (some-> schema-obj keyspecs keys))
+                              sub-selection (get sub-selects % [])]
+                          (s/resolve-spec `(s/select ~sub-schema ~sub-selection)))
+                        schema-obj))
+                    (get key-specs %)))
         opt-kset (set/difference (set/union (-> key-specs keys set)
                                             (-> sub-selects keys set))
                                  req-kset)]
