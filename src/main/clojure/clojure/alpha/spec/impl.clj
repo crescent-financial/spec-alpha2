@@ -417,7 +417,7 @@
         unq-specs (map s/resolve-spec (vals unq-map))
         uqks (zipmap (keys unq-map) unq-specs)
         key-specs (merge uqks qks)
-        lookup #(or (s/get-spec %) (get key-specs %))]
+        lookup #(#'s/reg-resolve (or (s/get-spec %) (get key-specs %)))]
     ;; schemas cannot contain nested select specs
     (assert (every? #(if-let [sp (s/get-spec %)] (not (select? sp)) true) ks))
     (assert (every? #(not (select? %)) unq-specs))
